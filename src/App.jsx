@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import Scene from './components/Scene.jsx'
+import Effects from './components/Effects.jsx'
 import CameraRig from './components/CameraRig.jsx'
 import Overlay from './components/Overlay.jsx'
 import MaraudersMap from './components/MaraudersMap.jsx'
@@ -90,11 +91,13 @@ export default function App() {
         className={`absolute inset-0 ${mapOpen ? 'pointer-events-none' : ''}`}
       >
         <Canvas
-          dpr={[1, 1.75]}
-          gl={{ antialias: true, powerPreference: 'high-performance' }}
+          dpr={[1, 1.5]}
+          shadows="variance"
+          gl={{ antialias: false, powerPreference: 'high-performance', stencil: false }}
           camera={{ position: INTRO_CAMERA, fov: 55, near: 0.3, far: 700 }}
         >
           <Scene />
+          <Effects />
           <CameraRig
             zones={ZONES}
             flyRequest={flyRequest}

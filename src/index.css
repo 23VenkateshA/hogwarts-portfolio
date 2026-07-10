@@ -39,6 +39,26 @@ body {
   color: #241806;
 }
 
+/* Zone overlays fade in gently as the camera enters a volumetric zone */
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.overlay-enter {
+  animation: overlay-in 0.55s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .overlay-enter {
+    animation: none;
+  }
+}
+
 /* Thin gold-tinted scrollbar for parchment panels */
 .parchment-scroll {
   scrollbar-width: thin;

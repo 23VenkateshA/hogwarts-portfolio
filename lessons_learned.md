@@ -54,5 +54,23 @@ Library tower (33 units tall) needed a 43-unit standoff; the Quidditch pitch nee
 **Summary:** After a hot update of CameraRig, the effect keyed on `flyRequest` re-runs with the last request and re-flies the camera (and in a hidden tab, leaves `flying=true` frozen, blocking WASD).
 Harmless in real use — the tween just replays — but during dev-tool verification, always re-trigger the intended flight after any HMR/reload rather than trusting prior camera state.
 
+## Cinematic pipeline: procedural PBR + VSM + post-processing, still zero assets
+**Summary:** The photoreal upgrade keeps the no-external-assets rule — PBR maps (albedo/normal/roughness) are baked at runtime onto canvases in `src/three/textures.js`, shared `MeshPhysicalMaterial`s live in `src/three/materials.js`, and the HDRI environment is drei `<Environment>` with `<Lightformer>` children (a baked procedural night sky), not a downloaded HDR.
+Post stack (`src/components/Effects.jsx`): SSAO (needs `enableNormalPass` on the composer) → Bloom (`luminanceThreshold` 1.0 so only emissives glow) → Vignette → ToneMapping ACES_FILMIC. With the composer active, the scene renders HDR to buffers and tone mapping happens exactly once in the final effect. Canvas uses `shadows="variance"` (VSM) with one shadow-casting directional light (`shadow-radius` + `shadow-blurSamples` for softness); point lights never cast shadows. 61 FPS at dpr 1.5 on this machine.
+
+## Physically-lit night scenes need lifted albedo and fill, not more lights
+**Summary:** After switching to MeshPhysicalMaterial + ACES, everything renders darker than the flat-shaded version — fix with brighter material albedo, `scene.environmentIntensity`, and faint emissive lifts on large ground surfaces, not by stacking point lights.
+The Quidditch lawn needed color `#a3cfae` (from `#2a4d33`!) plus a whisper of emissive to read as moonlit turf. Unlit south faces went pitch black until ambient + environmentIntensity were raised.
+
+## Rotated light-shaft planes: check the tilt sign per facade
+**Summary:** A beam plane hung from its top edge and rotated with `rotateX(+tilt)` swings toward −z — correct for east-facing (yaw-rotated) windows but INTO the building for south-facing ones; south shafts need negative tilt.
+Verify beams geometrically, not visually: `mesh.localToWorld(new Vector3(0, -length, 0))` must land outside the wall. All seven shafts confirmed this way after the fix.
+
+## Vite HMR does not refresh module-level material caches
+**Summary:** Shared material singletons cached at module scope keep their OLD instances on meshes after an HMR update of the materials module — component modules that imported them don't re-render with new instances. Always full-reload the page to judge material edits.
+
+## R3F `advance(timestamp)` does not derive delta from your timestamp
+**Summary:** In this R3F v9 setup, `useFrame` delta comes from real elapsed time between calls, so a tight loop of `advance()` calls yields ~0.4 ms deltas regardless of the timestamps passed. To drive time-based movement headlessly, hold input state and wait real milliseconds between advances (or rely on live rAF), instead of stepping simulated timestamps.
+
 ## Environment quirk (macOS, this machine)
 **Summary:** No `pdftoppm`/poppler installed, so the Read tool can't render PDFs — extract PDF text with `pypdf` installed to the scratchpad instead.

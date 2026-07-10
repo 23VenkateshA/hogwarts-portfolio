@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { waxMat, windowMat } from '../three/materials.js'
 
 /**
  * Floating candles drifting above the Great Hall courtyard, à la the movies.
@@ -44,19 +45,16 @@ export default function Candles({ count = 40 }) {
 
   return (
     <group>
-      <instancedMesh ref={bodies} args={[null, null, count]} frustumCulled={false}>
-        <cylinderGeometry args={[0.13, 0.17, 0.9, 6]} />
-        {/* Slight emissive so distant wax reads warm instead of as black sticks */}
-        <meshStandardMaterial color="#efe6cf" emissive="#8a7248" emissiveIntensity={0.5} roughness={0.7} />
+      <instancedMesh ref={bodies} args={[null, null, count]} frustumCulled={false} material={waxMat()}>
+        <cylinderGeometry args={[0.13, 0.17, 0.9, 8]} />
       </instancedMesh>
-      <instancedMesh ref={flames} args={[null, null, count]} frustumCulled={false}>
+      <instancedMesh
+        ref={flames}
+        args={[null, null, count]}
+        frustumCulled={false}
+        material={windowMat('#ffae34', 3.4)}
+      >
         <octahedronGeometry args={[0.17, 0]} />
-        <meshStandardMaterial
-          color="#ffd27a"
-          emissive="#ffae34"
-          emissiveIntensity={2.6}
-          toneMapped={false}
-        />
       </instancedMesh>
     </group>
   )

@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { Sparkles } from '@react-three/drei'
 import { ZoneLabel } from './Castle.jsx'
 import { ZONES } from '../data/resume.js'
+import { goldMat, woodMat, pitchGrassMat, windowMat, bannerClothMat } from '../three/materials.js'
 
 const GROUND_Y = -7.5
 
@@ -10,19 +11,11 @@ const GROUND_Y = -7.5
 function Hoop({ position, height }) {
   return (
     <group position={position}>
-      <mesh position={[0, height / 2, 0]}>
-        <cylinderGeometry args={[0.22, 0.3, height, 6]} />
-        <meshStandardMaterial color="#8a7440" roughness={0.5} metalness={0.6} />
+      <mesh position={[0, height / 2, 0]} material={woodMat()} castShadow receiveShadow>
+        <cylinderGeometry args={[0.22, 0.3, height, 8]} />
       </mesh>
-      <mesh position={[0, height + 2, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <torusGeometry args={[2, 0.22, 8, 20]} />
-        <meshStandardMaterial
-          color="#e8c268"
-          emissive="#c79b32"
-          emissiveIntensity={0.9}
-          metalness={0.7}
-          roughness={0.35}
-        />
+      <mesh position={[0, height + 2, 0]} rotation={[0, Math.PI / 2, 0]} material={goldMat()} castShadow>
+        <torusGeometry args={[2, 0.22, 10, 28]} />
       </mesh>
     </group>
   )
@@ -43,22 +36,16 @@ function Snitch() {
   })
   return (
     <group ref={ref}>
-      <mesh>
-        <sphereGeometry args={[0.32, 12, 10]} />
-        <meshStandardMaterial
-          color="#ffd977"
-          emissive="#ffbe3d"
-          emissiveIntensity={2.4}
-          toneMapped={false}
-        />
+      <mesh material={windowMat('#ffbe3d', 2.6)}>
+        <sphereGeometry args={[0.32, 16, 12]} />
       </mesh>
       <mesh position={[0.65, 0.1, 0]} rotation={[0, 0, 0.5]}>
         <planeGeometry args={[0.9, 0.3]} />
-        <meshStandardMaterial color="#f4f0e2" transparent opacity={0.85} side={2} />
+        <meshPhysicalMaterial color="#f4f0e2" transparent opacity={0.85} side={2} roughness={0.3} />
       </mesh>
       <mesh position={[-0.65, 0.1, 0]} rotation={[0, 0, -0.5]}>
         <planeGeometry args={[0.9, 0.3]} />
-        <meshStandardMaterial color="#f4f0e2" transparent opacity={0.85} side={2} />
+        <meshPhysicalMaterial color="#f4f0e2" transparent opacity={0.85} side={2} roughness={0.3} />
       </mesh>
     </group>
   )
@@ -81,14 +68,19 @@ export default function QuidditchPitch() {
   return (
     <group>
       {/* Oval lawn */}
-      <mesh position={[0, GROUND_Y + 0.06, -100]} rotation={[-Math.PI / 2, 0, 0]} scale={[1, 1.75, 1]}>
-        <circleGeometry args={[25, 36]} />
-        <meshStandardMaterial color="#2a4d33" roughness={1} />
+      <mesh
+        position={[0, GROUND_Y + 0.06, -100]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        scale={[1, 1.75, 1]}
+        material={pitchGrassMat()}
+        receiveShadow
+      >
+        <circleGeometry args={[25, 48]} />
       </mesh>
       {/* Pitch boundary ring */}
-      <mesh position={[0, GROUND_Y + 0.1, -100]} rotation={[-Math.PI / 2, 0, 0]} scale={[1, 1.75, 1]}>
-        <ringGeometry args={[24, 25, 40]} />
-        <meshStandardMaterial color="#d9c98e" roughness={1} />
+      <mesh position={[0, GROUND_Y + 0.1, -100]} rotation={[-Math.PI / 2, 0, 0]} scale={[1, 1.75, 1]} receiveShadow>
+        <ringGeometry args={[24, 25, 48]} />
+        <meshPhysicalMaterial color="#cbbd88" roughness={0.9} />
       </mesh>
       {/* Goal hoops, three per end */}
       <Hoop position={[-6, GROUND_Y, -134]} height={8} />
@@ -97,16 +89,20 @@ export default function QuidditchPitch() {
       <Hoop position={[-6, GROUND_Y, -66]} height={8} />
       <Hoop position={[0, GROUND_Y, -64]} height={11} />
       <Hoop position={[6, GROUND_Y, -66]} height={8} />
-      {/* Spectator stands */}
+      {/* Spectator stands: cloth-draped boxes on wood frames */}
       {stands.map((s, i) => (
-        <mesh key={i} position={[s.x, GROUND_Y + 2.2, s.z]} rotation={[0, s.rot, 0]}>
-          <boxGeometry args={[10, 4.4, 2.6]} />
-          <meshStandardMaterial color={s.color} roughness={0.95} flatShading />
-        </mesh>
+        <group key={i} position={[s.x, GROUND_Y + 2.2, s.z]} rotation={[0, s.rot, 0]}>
+          <mesh material={woodMat()} castShadow receiveShadow>
+            <boxGeometry args={[10, 4.4, 2.6]} />
+          </mesh>
+          <mesh position={[0, 0.2, 1.36]} material={bannerClothMat(s.color)} castShadow>
+            <boxGeometry args={[9.2, 3.6, 0.1]} />
+          </mesh>
+        </group>
       ))}
       <Snitch />
       <Sparkles count={36} scale={[46, 14, 70]} position={[0, 0, -100]} size={2.4} speed={0.5} color="#e8ecff" />
-      <pointLight position={[0, 8, -100]} color="#cdd8ff" intensity={220} distance={70} decay={1.8} />
+      <pointLight position={[0, 14, -100]} color="#cdd8ff" intensity={700} distance={95} decay={1.8} />
       {zone && <ZoneLabel zone={zone} />}
     </group>
   )

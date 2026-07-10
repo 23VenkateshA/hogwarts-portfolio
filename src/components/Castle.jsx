@@ -3,27 +3,24 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Html, Sparkles } from '@react-three/drei'
 import * as THREE from 'three'
 import { ZONES } from '../data/resume.js'
+import {
+  stoneMat,
+  stoneDarkMat,
+  roofMat,
+  woodMat,
+  ironMat,
+  windowMat,
+  bannerClothMat,
+  goldMat,
+} from '../three/materials.js'
 
-const STONE = '#3e4763'
-const STONE_DARK = '#333b54'
-const ROOF = '#232c47'
 const WINDOW_WARM = '#ffb347'
-
-function StoneMaterial({ color = STONE }) {
-  return <meshStandardMaterial color={color} roughness={0.95} flatShading />
-}
 
 /** Glowing window pane mounted on a wall or tower surface. */
 function Window({ position, rotationY = 0, size = [0.7, 1.3], color = WINDOW_WARM }) {
   return (
-    <mesh position={position} rotation={[0, rotationY, 0]}>
+    <mesh position={position} rotation={[0, rotationY, 0]} material={windowMat(color)}>
       <boxGeometry args={[size[0], size[1], 0.12]} />
-      <meshStandardMaterial
-        color={color}
-        emissive={color}
-        emissiveIntensity={1.6}
-        toneMapped={false}
-      />
     </mesh>
   )
 }
@@ -45,13 +42,11 @@ function Tower({ position, height = 16, radius = 3, windows = 3, windowColor = W
   }, [windows, height, radius])
   return (
     <group position={[x, 0, z]}>
-      <mesh position={[0, height / 2, 0]}>
-        <cylinderGeometry args={[radius, radius * 1.12, height, 8]} />
-        <StoneMaterial />
+      <mesh position={[0, height / 2, 0]} material={stoneMat()} castShadow receiveShadow>
+        <cylinderGeometry args={[radius, radius * 1.12, height, 12]} />
       </mesh>
-      <mesh position={[0, height + height * 0.14, 0]}>
-        <coneGeometry args={[radius * 1.45, height * 0.3, 8]} />
-        <StoneMaterial color={ROOF} />
+      <mesh position={[0, height + height * 0.14, 0]} material={roofMat()} castShadow receiveShadow>
+        <coneGeometry args={[radius * 1.45, height * 0.3, 12]} />
       </mesh>
       {panes.map((p, i) => (
         <Window key={i} position={p.pos} rotationY={p.rot} color={windowColor} />
@@ -70,9 +65,11 @@ function Wall({ from, to, height = 6, thickness = 2 }) {
     <mesh
       position={[(from[0] + to[0]) / 2, height / 2, (from[2] + to[2]) / 2]}
       rotation={[0, angle, 0]}
+      material={stoneDarkMat()}
+      castShadow
+      receiveShadow
     >
       <boxGeometry args={[thickness, height, length]} />
-      <StoneMaterial color={STONE_DARK} />
     </mesh>
   )
 }
@@ -90,24 +87,21 @@ function GreatHall() {
   }, [])
   return (
     <group>
-      <mesh position={[0, 5, 0]}>
+      <mesh position={[0, 5, 0]} material={stoneMat()} castShadow receiveShadow>
         <boxGeometry args={[16, 10, 30]} />
-        <StoneMaterial />
       </mesh>
       {/* Pitched roof: a long box rotated 45° so its upper half reads as a ridge.
           Kept shorter than the hall (29 < 30) so its unlit end caps stay hidden
           inside the walls instead of covering the facades. */}
-      <mesh position={[0, 10, 0]} rotation={[0, 0, Math.PI / 4]}>
+      <mesh position={[0, 10, 0]} rotation={[0, 0, Math.PI / 4]} material={roofMat()} castShadow receiveShadow>
         <boxGeometry args={[11.4, 11.4, 29]} />
-        <StoneMaterial color={ROOF} />
       </mesh>
       {sideWindows.map((w, i) => (
         <Window key={i} position={[w.x, 6, w.z]} rotationY={w.rot} size={[1.1, 3.6]} />
       ))}
       {/* Entrance doors, south face */}
-      <mesh position={[0, 2.4, 15.08]}>
+      <mesh position={[0, 2.4, 15.08]} material={woodMat()} receiveShadow>
         <boxGeometry args={[3.4, 4.8, 0.2]} />
-        <meshStandardMaterial color="#241a10" roughness={0.8} />
       </mesh>
       <Window position={[0, 7.6, 15.05]} size={[2.6, 2.6]} />
       {/* Entrance lanterns */}
@@ -129,14 +123,12 @@ function GreatHall() {
 function Dungeon() {
   return (
     <group position={[-32, 0, 6]}>
-      <mesh position={[0, 2.2, 0]}>
+      <mesh position={[0, 2.2, 0]} material={stoneDarkMat()} castShadow receiveShadow>
         <boxGeometry args={[13, 5.2, 15]} />
-        <StoneMaterial color={STONE_DARK} />
       </mesh>
       {/* Roof kept shorter than the walls (14.4 < 15) so its unlit end caps stay hidden */}
-      <mesh position={[0, 5.6, 0]} rotation={[0, 0, Math.PI / 4]}>
+      <mesh position={[0, 5.6, 0]} rotation={[0, 0, Math.PI / 4]} material={roofMat()} castShadow receiveShadow>
         <boxGeometry args={[9.4, 9.4, 14.4]} />
-        <StoneMaterial color={ROOF} />
       </mesh>
       <Window position={[6.58, 1.6, -3]} rotationY={Math.PI / 2} color="#6dff9e" size={[1.2, 0.9]} />
       <Window position={[6.58, 1.6, 3]} rotationY={Math.PI / 2} color="#6dff9e" size={[1.2, 0.9]} />
@@ -144,18 +136,11 @@ function Dungeon() {
       <Tower position={[-7.5, 0, -6]} height={10} radius={2} windows={2} windowColor="#6dff9e" />
       {/* Cauldron bubbling outside the entrance */}
       <group position={[3, 0, 10.5]}>
-        <mesh position={[0, 0.8, 0]}>
-          <cylinderGeometry args={[1.3, 0.9, 1.5, 10]} />
-          <meshStandardMaterial color="#14161c" roughness={0.6} metalness={0.5} />
+        <mesh position={[0, 0.8, 0]} material={ironMat()} castShadow receiveShadow>
+          <cylinderGeometry args={[1.3, 0.9, 1.5, 14]} />
         </mesh>
-        <mesh position={[0, 1.58, 0]}>
-          <cylinderGeometry args={[1.12, 1.12, 0.12, 10]} />
-          <meshStandardMaterial
-            color="#49ff8d"
-            emissive="#2dff70"
-            emissiveIntensity={2.2}
-            toneMapped={false}
-          />
+        <mesh position={[0, 1.58, 0]} material={windowMat('#2dff70', 2.6)}>
+          <cylinderGeometry args={[1.12, 1.12, 0.12, 14]} />
         </mesh>
         <Sparkles count={26} scale={[3, 4, 3]} position={[0, 3, 0]} size={4} speed={0.9} color="#7dffab" />
       </group>
@@ -190,9 +175,10 @@ function Library() {
             key={i}
             position={[Math.sin(b.angle) * b.r, b.y, Math.cos(b.angle) * b.r]}
             rotation={[b.tilt, b.angle, 0.3]}
+            castShadow
           >
             <boxGeometry args={[0.9, 0.16, 0.64]} />
-            <meshStandardMaterial color={b.color} roughness={0.8} />
+            <meshPhysicalMaterial color={b.color} roughness={0.8} sheen={0.4} />
           </mesh>
         ))}
       </group>
@@ -209,21 +195,17 @@ function CommonRoom() {
       <Tower position={[0, 0, 0]} height={18} radius={5} windows={4} windowColor="#ff9d4d" />
       {/* House banners, angled toward the arrival viewpoint in the southeast */}
       <group position={[3.65, 10, 3.65]} rotation={[0, Math.PI / 4, 0]}>
-        <mesh position={[-2, 0, 0]}>
+        <mesh position={[-2, 0, 0]} material={bannerClothMat('#7f0f14')} castShadow>
           <boxGeometry args={[2, 5.4, 0.08]} />
-          <meshStandardMaterial color="#7f0f14" roughness={0.9} />
         </mesh>
-        <mesh position={[-2, -2.2, 0.02]}>
+        <mesh position={[-2, -2.2, 0.02]} material={goldMat()}>
           <boxGeometry args={[2, 0.5, 0.08]} />
-          <meshStandardMaterial color="#d4af5f" emissive="#8a6a26" emissiveIntensity={0.6} />
         </mesh>
-        <mesh position={[2, 0, 0]}>
+        <mesh position={[2, 0, 0]} material={bannerClothMat('#12351f')} castShadow>
           <boxGeometry args={[2, 5.4, 0.08]} />
-          <meshStandardMaterial color="#12351f" roughness={0.9} />
         </mesh>
-        <mesh position={[2, -2.2, 0.02]}>
+        <mesh position={[2, -2.2, 0.02]} material={bannerClothMat('#b8bcc4')}>
           <boxGeometry args={[2, 0.5, 0.08]} />
-          <meshStandardMaterial color="#b8bcc4" emissive="#6a6e78" emissiveIntensity={0.5} />
         </mesh>
       </group>
       <Sparkles count={30} scale={[14, 10, 14]} position={[0, 12, 0]} size={2.4} speed={0.35} color="#ffb36b" />

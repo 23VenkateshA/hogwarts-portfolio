@@ -17,7 +17,7 @@ export default function Overlay({ zone, onClose, autoFocus }) {
       tabIndex={-1}
       role="dialog"
       aria-label={`${zone.name} — ${zone.theme}`}
-      className="parchment parchment-scroll fixed right-3 top-16 bottom-24 z-20 w-[min(92vw,430px)] overflow-y-auto rounded-lg p-6 outline-none sm:right-5 sm:top-20"
+      className="parchment parchment-scroll overlay-enter fixed right-3 top-16 bottom-24 z-20 w-[min(92vw,430px)] overflow-y-auto rounded-lg p-6 outline-none sm:right-5 sm:top-20"
     >
       <button
         onClick={onClose}
