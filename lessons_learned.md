@@ -72,5 +72,18 @@ Verify beams geometrically, not visually: `mesh.localToWorld(new Vector3(0, -len
 ## R3F `advance(timestamp)` does not derive delta from your timestamp
 **Summary:** In this R3F v9 setup, `useFrame` delta comes from real elapsed time between calls, so a tight loop of `advance()` calls yields ~0.4 ms deltas regardless of the timestamps passed. To drive time-based movement headlessly, hold input state and wait real milliseconds between advances (or rely on live rAF), instead of stepping simulated timestamps.
 
+## Artist .blend → web pipeline: headless Blender export + gltf-transform, but protect material names
+**Summary:** The castle is now the user-provided Blender model (`~/Downloads/hogwarts-3d`), exported headlessly (`blender --background --python export_glb.py`) and crushed 47.8 MB → 2.7 MB with `gltf-transform optimize --compress meshopt --texture-compress webp` — but the default `palette` pass RENAMES materials (LUZ/VIDROS → PaletteMaterialNNN), silently breaking any name-based material treatment; pass `--palette false`.
+The blend shipped with no packed images; `bpy.ops.file.find_missing_files(directory=<textures dir>)` re-linked the TexturesCom PBR set before export. Load with drei `useGLTF(url, false, true)` (meshopt decoder from three-stdlib — no CDN). Model meshes named in Portuguese: LUZ = window light planes, VIDROS = glass, JANELAS = frames — LUZ/VIDROS get swapped to a bright emissive so Bloom lights every window.
+
+## Never measure a cached GLTF scene with setFromObject while it may be parented
+**Summary:** `Box3.setFromObject(gltf.scene)` works in WORLD space; on HMR remounts the cached scene is still attached to the previous scaled wrapper, so the fit computes scale≈1 and the model vanishes at raw size. Clone the scene unparented first (`scene.clone(true)`), measure the clone, and render the clone.
+
+## Zone waypoints must clear EVERY zone's anchor, not just their own
+**Summary:** A waypoint that lands inside another zone's proximity radius makes the arrival overlay instantly swap to that zone (library waypoint sat exactly on the common-room anchor). After moving any waypoint, check its horizontal distance against ALL anchors: own distance < own radius, and for every other zone the distance/radius ratio must exceed the own-zone ratio.
+
+## This Browser pane's javascript_tool runs in an isolated world; rAF freezes when backgrounded
+**Summary:** `window.__hogwarts` set by page scripts is invisible to the tool — bridge by injecting a `<script>` tag (runs in main world) and passing results through `document.body.dataset`. GSAP tweens and rAF only advance during interactions (screenshots/clicks), so force-complete camera tweens via the bridge (position tween before gaze tween) and measure frame cost with a timed `advance()` loop instead of an rAF counter.
+
 ## Environment quirk (macOS, this machine)
 **Summary:** No `pdftoppm`/poppler installed, so the Read tool can't render PDFs — extract PDF text with `pypdf` installed to the scratchpad instead.

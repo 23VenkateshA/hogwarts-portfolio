@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Sparkles } from '@react-three/drei'
-import { ZoneLabel } from './Castle.jsx'
+import ZoneLabel from './ZoneLabel.jsx'
 import { ZONES } from '../data/resume.js'
 import { goldMat, woodMat, pitchGrassMat, windowMat, bannerClothMat } from '../three/materials.js'
 

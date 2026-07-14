@@ -1,8 +1,9 @@
-import { useEffect, useMemo } from 'react'
+import { Suspense, useEffect, useMemo } from 'react'
 import { useThree } from '@react-three/fiber'
 import { Stars, Environment, Lightformer } from '@react-three/drei'
 import * as THREE from 'three'
-import Castle from './Castle.jsx'
+import HogwartsModel from './HogwartsModel.jsx'
+import ZoneDressing from './ZoneDressing.jsx'
 import QuidditchPitch from './QuidditchPitch.jsx'
 import Candles from './Candles.jsx'
 import LightShafts from './LightShafts.jsx'
@@ -156,7 +157,7 @@ function Moon() {
 function NightEnvironment() {
   const scene = useThree((s) => s.scene)
   useEffect(() => {
-    scene.environmentIntensity = 0.75
+    scene.environmentIntensity = 1.15
   }, [scene])
   return (
     <Environment frames={1} resolution={128}>
@@ -177,12 +178,14 @@ export default function Scene() {
       <color attach="background" args={['#0a1022']} />
       {/* Exponential fog: deeper mood, hides the world edge */}
       <fogExp2 attach="fog" args={['#0a1022', 0.0055]} />
-      <ambientLight color="#59689e" intensity={0.45} />
+      <ambientLight color="#59689e" intensity={0.55} />
+      {/* Cool fill from the southwest so the moon-shadowed faces still read */}
+      <directionalLight position={[-60, 40, 70]} color="#46578f" intensity={0.65} />
       {/* Moonlight: the single shadow-casting light, VSM-blurred for soft edges */}
       <directionalLight
         position={[70, 90, -30]}
         color="#aebfec"
-        intensity={1.5}
+        intensity={2.1}
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-left={-110}
@@ -199,7 +202,10 @@ export default function Scene() {
       <NightEnvironment />
       <Moon />
       <Terrain />
-      <Castle />
+      <Suspense fallback={null}>
+        <HogwartsModel />
+      </Suspense>
+      <ZoneDressing />
       <QuidditchPitch />
       <Candles />
       <LightShafts />

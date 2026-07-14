@@ -18,10 +18,10 @@ export const ZONES = [
     name: 'The Great Hall',
     theme: 'Introduction',
     flavor: 'Welcome, first-year. The floating candles have been expecting you.',
-    camera: { position: [0, 9, 36], lookAt: [0, 6, 0] },
-    anchor: [0, 0, 14],
-    radius: 26,
-    label: { text: 'The Great Hall', position: [0, 20.5, 0] },
+    camera: { position: [-11, 16, 66], lookAt: [-11, 10, 37.5] },
+    anchor: [-11, 0, 34],
+    radius: 34,
+    label: { text: 'The Great Hall', position: [-11, 24, 34] },
     sections: [
       {
         heading: 'Arvind Venkatesh',
@@ -48,10 +48,10 @@ export const ZONES = [
     name: 'The Potions Dungeon',
     theme: 'Professional Experience',
     flavor: 'Down here, raw data is brewed into measurable impact.',
-    camera: { position: [-42, 9, 32], lookAt: [-32, 3, 6] },
-    anchor: [-32, 0, 8],
-    radius: 28,
-    label: { text: 'The Potions Dungeon', position: [-32, 14.5, 6] },
+    camera: { position: [-44, 8, 46], lookAt: [-24, 8, 16] },
+    anchor: [-28, 0, 20],
+    radius: 32,
+    label: { text: 'The Potions Dungeon', position: [-26, 14, 20] },
     sections: [
       {
         heading: 'Capital One — Product Management Intern',
@@ -86,10 +86,10 @@ export const ZONES = [
     name: 'The Library',
     theme: 'Projects',
     flavor: 'The Restricted Section — where the technical builds are shelved.',
-    camera: { position: [56, 24, 22], lookAt: [30, 16, -12] },
-    anchor: [30, 0, -12],
-    radius: 44,
-    label: { text: 'The Library', position: [30, 36.5, -12] },
+    camera: { position: [24, 44, -24], lookAt: [4, 36, -4] },
+    anchor: [4, 0, -4],
+    radius: 34,
+    label: { text: 'The Library', position: [4, 66, -4] },
     sections: [
       {
         heading: 'NBA MVP Predictor',
@@ -122,10 +122,10 @@ export const ZONES = [
     name: 'The Common Room',
     theme: 'Campus Leadership',
     flavor: 'Where the house gathers — and someone has to lead it.',
-    camera: { position: [40, 12, 42], lookAt: [20, 9, 20] },
-    anchor: [22, 0, 22],
-    radius: 28,
-    label: { text: 'The Common Room', position: [22, 25, 22] },
+    camera: { position: [38, 14, 48], lookAt: [26, 10, 30] },
+    anchor: [26, 0, 20],
+    radius: 34,
+    label: { text: 'The Common Room', position: [26, 22, 28] },
     sections: [
       {
         heading: 'Business Information Technology Society (BITS) — VP of Web Development',

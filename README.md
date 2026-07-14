@@ -41,9 +41,12 @@ instead of camera flights.
 - **Single source of truth:** all resume content *and* 3D zone metadata (camera
   waypoints, proximity anchors, label positions) live in `src/data/resume.js`.
   The 3D overlays and the text map render from the same objects.
-- **Fully procedural scene:** the castle is built from three.js primitives — no
-  external models or textures. See `lessons_learned.md` for the rendering and
-  architecture lessons collected while building (read it before changing the scene).
+- **Artist-built castle:** the castle is a Blender model exported headlessly to a
+  meshopt-compressed GLB (`public/models/hogwarts.glb`, 2.7 MB) with its window
+  glass/light materials re-lit as emissives so every pane feeds the Bloom pass.
+  Terrain, Quidditch pitch, candles, and god rays remain procedural.
+  See `lessons_learned.md` for the export pipeline and rendering lessons
+  (read it before changing the scene).
 
 ## Stack
 

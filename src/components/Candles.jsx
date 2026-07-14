@@ -14,10 +14,11 @@ export default function Candles({ count = 40 }) {
   const dummy = useMemo(() => new THREE.Object3D(), [])
   const seeds = useMemo(
     () =>
+      // Hovering along the castle's lit south front, drifting over the cliff edge
       Array.from({ length: count }, () => ({
-        x: -20 + Math.random() * 40,
-        y: 12 + Math.random() * 6,
-        z: -16 + Math.random() * 36,
+        x: -24 + Math.random() * 36,
+        y: 10 + Math.random() * 8,
+        z: 38 + Math.random() * 14,
         phase: Math.random() * Math.PI * 2,
         speed: 0.5 + Math.random() * 0.7,
       })),
