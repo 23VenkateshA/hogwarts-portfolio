@@ -85,5 +85,12 @@ The blend shipped with no packed images; `bpy.ops.file.find_missing_files(direct
 ## This Browser pane's javascript_tool runs in an isolated world; rAF freezes when backgrounded
 **Summary:** `window.__hogwarts` set by page scripts is invisible to the tool — bridge by injecting a `<script>` tag (runs in main world) and passing results through `document.body.dataset`. GSAP tweens and rAF only advance during interactions (screenshots/clicks), so force-complete camera tweens via the bridge (position tween before gaze tween) and measure frame cost with a timed `advance()` loop instead of an rAF counter.
 
+## HemisphereLight blacks out the postprocessing composer in this stack
+**Summary:** Adding a `<hemisphereLight>` to the scene makes the EffectComposer (SSAO + Bloom + ToneMapping, postprocessing 6.39 / three 0.185) output pure black with zero console errors; bisected by rebuilding the last-good commit and re-applying edits one at a time. Use AmbientLight (+ `gl.toneMappingExposure` ≈ 1.18, set in an effect — NOT via the Canvas `gl` prop) for global fill instead.
+
+## Verify prod builds with a dumb static server, and beware two local-serving traps
+**Summary:** (1) rolldown-vite 8's `vite preview` served our 1.4 MB bundle as a 1 KB SPA-fallback (index.html) with status 200 — silently — while small files worked; `python3 -m http.server` against a symlinked base-path dir serves it correctly and is the trustworthy check. (2) If the browser requests a bundle while `dist` is mid-write, it caches the 404/fallback and REPLAYS it across reloads — a content-hash change (real code change; comments get minified away) is the reliable cache-buster.
+Debug shortcut that cracked it: `git stash` → build last-good commit → confirm it renders → re-apply changes piecewise. Fifteen minutes of theorizing lost to what one bisect answered.
+
 ## Environment quirk (macOS, this machine)
 **Summary:** No `pdftoppm`/poppler installed, so the Read tool can't render PDFs — extract PDF text with `pypdf` installed to the scratchpad instead.

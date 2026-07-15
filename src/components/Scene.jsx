@@ -156,9 +156,12 @@ function Moon() {
 /** Procedural night-sky environment map: moonlight + horizon glow for PBR reflections. */
 function NightEnvironment() {
   const scene = useThree((s) => s.scene)
+  const gl = useThree((s) => s.gl)
   useEffect(() => {
     scene.environmentIntensity = 1.15
-  }, [scene])
+    // Lift the exposure curve so moon-shadowed faces stay readable.
+    gl.toneMappingExposure = 1.18
+  }, [scene, gl])
   return (
     <Environment frames={1} resolution={128}>
       <color attach="background" args={['#060b1a']} />
@@ -178,6 +181,9 @@ export default function Scene() {
       <color attach="background" args={['#0a1022']} />
       {/* Exponential fog: deeper mood, hides the world edge */}
       <fogExp2 attach="fog" args={['#0a1022', 0.0055]} />
+      {/* Global baseline fill. NOTE: do NOT swap this for a HemisphereLight —
+          with this three/postprocessing combo it blacks out the composer
+          output entirely (bisected 2026-07-15; see lessons_learned.md). */}
       <ambientLight color="#59689e" intensity={0.55} />
       {/* Cool fill from the southwest so the moon-shadowed faces still read */}
       <directionalLight position={[-60, 40, 70]} color="#46578f" intensity={0.65} />
@@ -188,14 +194,14 @@ export default function Scene() {
         intensity={2.1}
         castShadow
         shadow-mapSize={[2048, 2048]}
-        shadow-camera-left={-110}
-        shadow-camera-right={110}
-        shadow-camera-top={110}
-        shadow-camera-bottom={-150}
-        shadow-camera-near={20}
-        shadow-camera-far={300}
-        shadow-radius={7}
-        shadow-blurSamples={16}
+        shadow-camera-left={-70}
+        shadow-camera-right={70}
+        shadow-camera-top={70}
+        shadow-camera-bottom={-70}
+        shadow-camera-near={50}
+        shadow-camera-far={210}
+        shadow-radius={5}
+        shadow-blurSamples={4}
         shadow-bias={-0.0002}
       />
       <Stars radius={260} depth={60} count={3000} factor={5} saturation={0} fade speed={0.5} />

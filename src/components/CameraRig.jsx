@@ -28,6 +28,10 @@ export default function CameraRig({ zones, flyRequest, onArrive, onProximity, in
   const scene = useThree((s) => s.scene)
   const yaw = useRef(0)
   const pitch = useRef(0)
+  // Drag input writes targets; the render loop lerps toward them so look
+  // motion is smoothed instead of snapping to raw pointer deltas.
+  const targetYaw = useRef(0)
+  const targetPitch = useRef(0)
   const keys = useRef({})
   const flying = useRef(false)
   const lookPoint = useRef(new THREE.Vector3())
@@ -40,6 +44,8 @@ export default function CameraRig({ zones, flyRequest, onArrive, onProximity, in
     const dir = target.clone().sub(camera.position).normalize()
     pitch.current = Math.asin(THREE.MathUtils.clamp(dir.y, -1, 1))
     yaw.current = Math.atan2(-dir.x, -dir.z)
+    targetPitch.current = pitch.current
+    targetYaw.current = yaw.current
   }
 
   // Initial orientation: gaze at the castle from the opening vantage point.
@@ -52,7 +58,7 @@ export default function CameraRig({ zones, flyRequest, onArrive, onProximity, in
     // Dev-only hook so animation state can be driven/inspected headlessly
     // (rAF is paused in hidden tabs, freezing GSAP and the frame loop).
     if (import.meta.env.DEV) {
-      window.__hogwarts = { camera, gsap, advance, scene, THREE, keys, flying }
+      window.__hogwarts = { camera, gsap, advance, scene, THREE, keys, flying, gl }
     }
   }, [camera]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -70,9 +76,9 @@ export default function CameraRig({ zones, flyRequest, onArrive, onProximity, in
     }
     const move = (e) => {
       if (!dragging || flying.current || !inputRef.current) return
-      yaw.current -= (e.clientX - px) * 0.0035
-      pitch.current = THREE.MathUtils.clamp(
-        pitch.current - (e.clientY - py) * 0.0035,
+      targetYaw.current -= (e.clientX - px) * 0.0035
+      targetPitch.current = THREE.MathUtils.clamp(
+        targetPitch.current - (e.clientY - py) * 0.0035,
         -PITCH_LIMIT,
         PITCH_LIMIT
       )
@@ -158,6 +164,10 @@ export default function CameraRig({ zones, flyRequest, onArrive, onProximity, in
   useFrame((_, delta) => {
     if (flying.current) return
     if (inputRef.current) {
+      // Frame-rate-independent damping toward the drag targets (~1/14s lag).
+      const damp = 1 - Math.exp(-14 * Math.min(delta, 0.1))
+      yaw.current = THREE.MathUtils.lerp(yaw.current, targetYaw.current, damp)
+      pitch.current = THREE.MathUtils.lerp(pitch.current, targetPitch.current, damp)
       const k = keys.current
       const sprint = k.ShiftLeft || k.ShiftRight
       const speed = (sprint ? 36 : 14) * Math.min(delta, 0.1)
